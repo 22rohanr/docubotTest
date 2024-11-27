@@ -37,12 +37,14 @@ jobs:
         run: |
           echo '${{ steps.get_changed_files.outputs.result }}' > changedFiles.txt
           if [ -s changedFiles.txt ]; then
-            files_changed=$(jq -r '.' changedFiles.txt)
+            # Ensure `files_changed` is treated as a valid JSON array
+            files_changed=$(cat changedFiles.txt | jq -c .)
           else
             files_changed='[]'
           fi
           echo "Files changed: $files_changed"
           echo "::set-output name=files_changed::$files_changed"
+
 
       # Step 4: Call the Documentation API
       - name: Call the Documentation API
