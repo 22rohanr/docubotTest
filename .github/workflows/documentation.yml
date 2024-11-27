@@ -93,4 +93,4 @@ jobs:
             echo "No changes in documentation.md, skipping commit."
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
