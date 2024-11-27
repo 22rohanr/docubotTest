@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
+      # Step 1: Checkout the Code
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Step 2: Get Changed Files
       - name: Get Changed Files
@@ -31,36 +31,38 @@ jobs:
             console.log("Changed files: ", changedFiles);  // Debugging output
             return JSON.stringify(changedFiles);
 
-      # Step 3: Read Changed Files
-      - name: Read Changed Files
-        id: read_changed_files
+      # Step 3: Prepare Changed Files
+      - name: Prepare Changed Files
+        id: prepare_changed_files
         run: |
           echo '${{ steps.get_changed_files.outputs.result }}' > changedFiles.txt
           if [ -s changedFiles.txt ]; then
-            files_changed=$(cat changedFiles.txt)
+            files_changed=$(jq -r '.' changedFiles.txt)
           else
             files_changed='[]'
           fi
-          echo "Files changed: $files_changed"  # Debugging step
+          echo "Files changed: $files_changed"
+          echo "::set-output name=files_changed::$files_changed"
 
       # Step 4: Call the Documentation API
       - name: Call the Documentation API
         id: call_api
         run: |
-          if [ -s changedFiles.txt ]; then
-            files_changed=$(cat changedFiles.txt)
-          else
-            files_changed='[]'
-          fi
-          files_changed=$(echo $files_changed | jq .)
-          json_payload=$(jq -n --arg repo_owner "${{ github.repository_owner }}" --arg repo "${{ github.event.repository.name }}" --argjson files_changed "$files_changed" '{repo_owner: $repo_owner, repo: $repo, files_changed: $files_changed}')
-          echo "JSON Payload: $json_payload"  # Debugging step
-          response=$(curl -s https://docubot-two.vercel.app/document -H "Content-Type: application/json" -d "$json_payload")
+          files_changed="${{ steps.prepare_changed_files.outputs.files_changed }}"
+          json_payload=$(jq -n \
+            --arg repo_owner "${{ github.repository_owner }}" \
+            --arg repo "${{ github.event.repository.name }}" \
+            --argjson files_changed "$files_changed" \
+            '{repo_owner: $repo_owner, repo: $repo, files_changed: $files_changed}')
+          echo "JSON Payload: $json_payload"
+          response=$(curl -s https://docubot-two.vercel.app/document \
+            -H "Content-Type: application/json" \
+            -d "$json_payload")
           if [ $? -ne 0 ]; then
             echo "Error in API request"
             exit 1
           fi
-          echo "API Response: $response"  # Debugging step
+          echo "API Response: $response"
           if echo "$response" | jq -e . > /dev/null 2>&1; then
             echo "$response" > response.json
           else
