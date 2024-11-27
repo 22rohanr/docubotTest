@@ -5,16 +5,6 @@ app = Flask(__name__)
 # Mock car database
 car_database = []
 
-# Add a New Car
-@app.route('/cars', methods=['POST'])
-def add_car():
-    car = request.json
-    if not car or "make" not in car or "model" not in car or "year" not in car:
-        return jsonify({"error": "Invalid input. 'make', 'model', and 'year' fields are required."}), 400
-    car["id"] = len(car_database) + 1
-    car_database.append(car)
-    return jsonify({"message": "Car added", "car": car}), 201
-
 # Update an Existing Car
 @app.route('/cars/<int:car_id>', methods=['PUT'])
 def update_car(car_id):
