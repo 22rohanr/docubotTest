@@ -42,6 +42,8 @@ jobs:
           fi
           echo "Files changed: $files_changed"  # Debugging step
       - name: Call the API
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN_2 }}
         run: |
           if [ -f changedFiles.txt ]; then
             files_changed=$(cat changedFiles.txt)
@@ -68,6 +70,8 @@ jobs:
         run: |
           cat response.txt > documentation.md
       - name: Commit and Push Changes if Documentation Was Updated
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN_2 }}
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
@@ -82,5 +86,4 @@ jobs:
           else
             echo "No changes in documentation.md, skipping commit."
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN_2 }}
+        
