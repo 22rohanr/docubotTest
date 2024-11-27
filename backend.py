@@ -5,16 +5,6 @@ app = Flask(__name__)
 # Mock car database
 car_database = []
 
-# Health Check Endpoint
-@app.route('/health', methods=['GET'])
-def health_check():
-    return jsonify({"status": "healthy"}), 200
-
-# Get All Cars
-@app.route('/cars', methods=['GET'])
-def get_cars():
-    return jsonify({"cars": car_database}), 200
-
 # Add a New Car
 @app.route('/cars', methods=['POST'])
 def add_car():
