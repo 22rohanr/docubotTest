@@ -1,20 +1,22 @@
-name: Update Documentation
+name: Combined Workflow
 
 on:
   push:
     branches:
+      - '**'
+
+  pull_request:
+    branches:
       - main
 
 jobs:
-  update-documentation:
+  documentation:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the Code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      # Step 2: Get Changed Files
       - name: Get Changed Files
         id: get_changed_files
         uses: actions/github-script@v6
@@ -28,71 +30,55 @@ jobs:
               ref: commitSha
             });
             const changedFiles = commit.data.files.map(file => file.filename);
-            console.log("Changed files: ", changedFiles);  // Debugging output
-            return JSON.stringify(changedFiles);
-
-      # Step 3: Prepare Changed Files
-      - name: Prepare Changed Files
-        id: prepare_changed_files
+            console.log("Changed files: ", changedFiles);  // Print changed files for debugging
+            const fs = require('fs');
+            fs.writeFileSync('changedFiles.txt', JSON.stringify(changedFiles));
+      - name: Read Changed Files
         run: |
-          echo '${{ steps.get_changed_files.outputs.result }}' > changedFiles.txt
-          if [ -s changedFiles.txt ]; then
-            # Ensure `files_changed` is treated as a valid JSON array
-            files_changed=$(cat changedFiles.txt | jq -c .)
+          if [ -f changedFiles.txt ]; then
+            files_changed=$(cat changedFiles.txt)
           else
             files_changed='[]'
           fi
-          echo "Files changed: $files_changed"
-          echo "::set-output name=files_changed::$files_changed"
-
-
-      # Step 4: Call the Documentation API
-      - name: Call the Documentation API
-        id: call_api
+          echo "Files changed: $files_changed"  # Debugging step
+      - name: Call the API
         run: |
-          files_changed="${{ steps.prepare_changed_files.outputs.files_changed }}"
-          json_payload=$(jq -n \
-            --arg repo_owner "${{ github.repository_owner }}" \
-            --arg repo "${{ github.event.repository.name }}" \
-            --argjson files_changed "$files_changed" \
-            '{repo_owner: $repo_owner, repo: $repo, files_changed: $files_changed}')
-          echo "JSON Payload: $json_payload"
-          response=$(curl -s https://docubot-two.vercel.app/document \
-            -H "Content-Type: application/json" \
-            -d "$json_payload")
+          if [ -f changedFiles.txt ]; then
+            files_changed=$(cat changedFiles.txt)
+          else
+            files_changed='[]'
+          fi
+          files_changed=$(echo $files_changed | jq .)
+          json_payload=$(jq -n --arg repo_owner "${{ github.repository_owner }}" --arg repo "${{ github.event.repository.name }}" --argjson files_changed "$files_changed" '{repo_owner: $repo_owner, repo: $repo, files_changed: $files_changed}')
+          echo "JSON Payload: $json_payload"  # Debugging step
+          response=$(curl -s https://docubot-two.vercel.app/document -H "Content-Type: application/json" -d "$json_payload")
           if [ $? -ne 0 ]; then
             echo "Error in API request"
             exit 1
           fi
-          echo "API Response: $response"
+          echo "API Response: $response"  # Debugging step
           if echo "$response" | jq -e . > /dev/null 2>&1; then
-            echo "$response" > response.json
+            response_content=$(echo $response | jq -r '.updated_doc')
+            echo "$response_content" > response.txt
           else
             echo "Invalid JSON response: $response"
             exit 1
           fi
-
-      # Step 5: Extract Documentation from API Response
-      - name: Extract Documentation
+      - name: Update Documentation
         run: |
-          response_content=$(jq -r '.updated_doc' response.json)
-          if [ -z "$response_content" ]; then
-            echo "No documentation was generated."
-            exit 1
-          fi
-          echo "$response_content" > documentation.md
-          echo "Documentation generated successfully."
-
-      # Step 6: Commit and Push Changes if Documentation Was Updated
-      - name: Commit and Push Changes
+          cat response.txt > documentation.md
+      - name: Commit and Push Changes if Documentation Was Updated
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
+          
           if ! git diff --quiet documentation.md; then
             echo "Documentation updated, committing changes..."
             git add documentation.md
             git commit -m "Update documentation with API data"
-            git push
+            # Extract branch name from 'github.ref' (e.g., 'refs/heads/branch-name' -> 'branch-name')
+            branch_name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
+            git push origin "$branch_name"
           else
             echo "No changes in documentation.md, skipping commit."
           fi
