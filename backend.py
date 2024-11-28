@@ -5,7 +5,7 @@ app = Flask(__name__)
 # Mock car database
 car_database = []
 
-# Update an Existing Car 
+# Update an Existing Car
 @app.route('/cars/<int:car_id>', methods=['PUT'])
 def update_car(car_id): 
     car = next((c for c in car_database if c["id"] == car_id), None)
@@ -36,6 +36,27 @@ def delete_car(car_id):
 @app.route('/cars', methods=['GET'])
 def get_all_cars():
     return jsonify({"cars": car_database}), 200
+
+# Add a New Car
+@app.route('/cars', methods=['POST'])
+def add_car():
+    new_car = request.json
+    if not new_car or "make" not in new_car or "model" not in new_car or "year" not in new_car:
+        return jsonify({"error": "Invalid input. 'make', 'model', and 'year' fields are required."}), 400
+    new_car["id"] = len(car_database) + 1
+    car_database.append(new_car)
+    return jsonify({"message": "Car added", "car": new_car}), 201
+
+# Search Cars by Attribute
+@app.route('/cars/search', methods=['GET'])
+def search_cars():
+    attribute = request.args.get('attribute')
+    value = request.args.get('value')
+    if not attribute or not value:
+        return jsonify({"error": "Both 'attribute' and 'value' query parameters are required."}), 400
+
+    matching_cars = [car for car in car_database if str(car.get(attribute, '')).lower() == value.lower()]
+    return jsonify({"matching_cars": matching_cars}), 200
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
