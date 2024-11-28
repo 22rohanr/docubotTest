@@ -6,10 +6,10 @@
 - Parameters:
  - `car_id` (int): The unique identifier of the car to be updated.
 - Request Body:
- - `updates` (JSON): A dictionary containing the fields to be updated in the car record.
+ - `updates` (JSON): A JSON object containing the fields to update in the car record.
 - Response:
  - Returns a JSON object with a success message and the updated car details, or an error message if the car is not found.
- - Status Codes: 200 (OK) if updated successfully, 404 (Not Found) if the car ID is not found.
+ - Status Codes: 200 (OK) for successful updates, 404 (Not Found) if the car ID is not found.
 
 ### 2. Get a Car by ID:
 - Endpoint: `/cars/<int:car_id>`
@@ -17,8 +17,8 @@
 - Parameters:
  - `car_id` (int): The unique identifier of the car to retrieve.
 - Response:
- - Returns a JSON object with the car details, or an error message if the car is not found.
- - Status Codes: 200 (OK) if the car is found, 404 (Not Found) if the car ID is not found.
+ - Returns a JSON object containing the car details, or an error message if the car is not found.
+ - Status Codes: 200 (OK) if the car is found, 404 (Not Found) otherwise.
 
 ### 3. Delete a Car:
 - Endpoint: `/cars/<int:car_id>`
@@ -26,8 +26,8 @@
 - Parameters:
  - `car_id` (int): The unique identifier of the car to be deleted.
 - Response:
- - Returns a JSON object with a success message and the deleted car details, or an error message if the car is not found.
- - Status Codes: 200 (OK) if deleted successfully, 404 (Not Found) if the car ID is not found.
+ - Returns a JSON object with a success message and the deleted car details, or an error message.
+ - Status Codes: 200 (OK) if deleted, 404 (Not Found) if the car ID is not found.
 
 ### 4. Get All Cars:
 - Endpoint: `/cars`
@@ -40,17 +40,16 @@
 - Endpoint: `/cars`
 - Method: `POST`
 - Request Body:
- - `new_car` (JSON): A dictionary containing the details of the new car, including 'make', 'model', and 'year' fields.
+ - `new_car` (JSON): A JSON object containing the new car details, including 'make', 'model', and 'year' fields.
 - Response:
- - Returns a JSON object with a success message and the added car details, or an error message if the input is invalid.
- - Status Codes: 201 (Created) if the car is added successfully, 400 (Bad Request) if the input is invalid.
+ - Returns a JSON object with a success message and the added car's details, or an error message for invalid input.
+ - Status Codes: 201 (Created) for successful addition, 400 (Bad Request) for invalid input.
 
-### 6. Search Cars by Attribute:
-- Endpoint: `/cars/search`
+### 6. Get Cars by Year:
+- Endpoint: `/cars/year/<int:year>`
 - Method: `GET`
-- Query Parameters:
- - `attribute` (str): The attribute to search for (e.g., 'make', 'model', 'year').
- - `value` (str): The value to match against the specified attribute.
+- Parameters:
+ - `year` (int): The year to filter cars by.
 - Response:
- - Returns a JSON object with a list of matching cars, or an error message if the query parameters are missing.
- - Status Codes: 200 (OK) if the search is successful, 400 (Bad Request) if required query parameters are missing.
+ - Returns a JSON object with a list of cars matching the specified year, or an error message if no cars match.
+ - Status Code: 200 (OK)
