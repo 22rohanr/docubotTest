@@ -12,7 +12,7 @@ def update_car(car_id):
     if not car:
         return jsonify({"error": "Car not found"}), 404
     updates = request.json
-    car.update(updates)
+    car.update(updates) 
     return jsonify({"message": "Car updated", "car": car}), 200
 
 # Get a Car by ID
