@@ -8,4 +8,4 @@ This repository is a testbed for **Docubot**, a tool designed to generate and up
 
 ## Documentation
 
-The current documentation is available in the [documentation.md](documentation.md) file.
+The current documentation is available here: [documentation.md](documentation.md).
