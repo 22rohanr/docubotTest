@@ -54,7 +54,7 @@ jobs:
             --arg repo_owner "${{ github.repository_owner }}" \
             --arg repo "${{ github.event.repository.name }}" \
             --argjson files_changed "$files_changed" \
-            --arg github_token "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" \
+            --arg github_token "asdf" \
             '{repo_owner: $repo_owner, repo: $repo, files_changed: $files_changed, github_token: $github_token}')
                     
           echo "JSON Payload: $json_payload"  # Debugging step
