@@ -7,7 +7,7 @@ car_database = []
 
 # Update an Existing Car
 @app.route('/cars/<int:car_id>', methods=['PUT'])
-def update_car(car_id):
+def update_car(car_id): 
     car = next((c for c in car_database if c["id"] == car_id), None)
     if not car:
         return jsonify({"error": "Car not found"}), 404
