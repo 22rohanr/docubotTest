@@ -47,15 +47,10 @@ def add_car():
     car_database.append(new_car)
     return jsonify({"message": "Car added", "car": new_car}), 201
 
-# Search Cars by Attribute
-@app.route('/cars/search', methods=['GET'])
-def search_cars():
-    attribute = request.args.get('attribute')
-    value = request.args.get('value')
-    if not attribute or not value:
-        return jsonify({"error": "Both 'attribute' and 'value' query parameters are required."}), 400
-
-    matching_cars = [car for car in car_database if str(car.get(attribute, '')).lower() == value.lower()]
+# Get Cars by Year
+@app.route('/cars/year/<int:year>', methods=['GET'])
+def get_cars_by_year(year):
+    matching_cars = [car for car in car_database if car.get("year") == year]
     return jsonify({"matching_cars": matching_cars}), 200
 
 if __name__ == "__main__":
