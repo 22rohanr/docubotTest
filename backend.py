@@ -5,7 +5,7 @@ app = Flask(__name__)
 # Mock car database
 car_database = []
 
-# Update an Existing Car
+# Update an Existing Car 
 @app.route('/cars/<int:car_id>', methods=['PUT'])
 def update_car(car_id): 
     car = next((c for c in car_database if c["id"] == car_id), None)
