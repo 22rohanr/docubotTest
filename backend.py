@@ -33,7 +33,7 @@ def delete_car(car_id):
     return jsonify({"message": "Car deleted", "car": car}), 200
 
 # Get All Cars
-@app.route('/cars', methods=['GET'])
+@app.route('/cars', methods=['GET']) 
 def get_all_cars():
     return jsonify({"cars": car_database}), 200
 
