@@ -58,7 +58,7 @@ jobs:
             '{repo_owner: $repo_owner, repo: $repo, files_changed: $files_changed, github_token: $github_token}')
                     
           echo "JSON Payload: $json_payload"
-          response=$(curl -s https://ht1i23wyxc.execute-api.us-east-2.amazonaws.com/document -H "Content-Type: application/json" -d "$json_payload")
+          response=$(curl -s ${{ secrets.AWS_API_URL }} -H "Content-Type: application/json" -d "$json_payload")
           if [ $? -ne 0 ]; then
             echo "Error in API request"
             exit 1
